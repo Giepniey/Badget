@@ -14,56 +14,63 @@ public class DashboardPanel extends JPanel {
         this.transactions = dataManager.loadTransactions();
         this.goals = dataManager.loadGoals();
         
-        setLayout(new BorderLayout(10, 10));
-        setBackground(new Color(15, 15, 25));
+        setLayout(new BorderLayout());
+        setBackground(new Color(245, 245, 245));
         
-        // Header to
-        JPanel headerPanel = createHeader();
-        add(headerPanel, BorderLayout.NORTH);
+        add(createHeader(), BorderLayout.NORTH);
         
-        // Tabbed pane for different sections
         tabbedPane = new JTabbedPane();
-        tabbedPane.setBackground(new Color(25, 25, 40));
-        tabbedPane.setForeground(new Color(230, 230, 240));
-        tabbedPane.setFont(new Font("Segoe UI", Font.PLAIN, 12));
+        tabbedPane.setBackground(Color.WHITE);
+        tabbedPane.setForeground(new Color(50, 50, 50));
+        tabbedPane.setFont(new Font("Arial", Font.PLAIN, 13));
+        tabbedPane.setBorder(new EmptyBorder(0, 0, 0, 0));
         
         tabbedPane.addTab("Dashboard", new OverviewPanel(transactions));
         tabbedPane.addTab("Add Transaction", new TransactionFormPanel(this));
-        tabbedPane.addTab("Monthly Report", new ReportsPanel(transactions));
+        tabbedPane.addTab("Reports", new ReportsPanel(transactions));
         tabbedPane.addTab("Categories", new CategoriesPanel(transactions));
-        tabbedPane.addTab("Goals", new GoalsPanel(this, goals));
         
         add(tabbedPane, BorderLayout.CENTER);
     }
     
     private JPanel createHeader() {
         JPanel header = new JPanel();
-        header.setBackground(new Color(20, 20, 35));
-        header.setLayout(new BorderLayout(15, 10));
-        header.setBorder(new EmptyBorder(15, 20, 15, 20));
+        header.setBackground(Color.WHITE);
+        header.setLayout(new BorderLayout());
+        header.setBorder(new MatteBorder(0, 0, 1, 0, new Color(220, 220, 220)));
+        
+        JPanel leftPanel = new JPanel();
+        leftPanel.setBackground(Color.WHITE);
+        leftPanel.setLayout(new FlowLayout(FlowLayout.LEFT, 20, 15));
         
         JLabel title = new JLabel("Badget");
-        title.setFont(new Font("Segoe UI", Font.BOLD, 28));
-        title.setForeground(new Color(100, 200, 255));
+        title.setFont(new Font("Arial", Font.BOLD, 24));
+        title.setForeground(new Color(50, 50, 50));
+        leftPanel.add(title);
         
-        JLabel subtitle = new JLabel("Budget & Expense Tracker");
-        subtitle.setFont(new Font("Segoe UI", Font.PLAIN, 12));
-        subtitle.setForeground(new Color(150, 150, 170));
+        header.add(leftPanel, BorderLayout.WEST);
         
-        JPanel titlePanel = new JPanel(new BorderLayout());
-        titlePanel.setOpaque(false);
-        titlePanel.add(title, BorderLayout.NORTH);
-        titlePanel.add(subtitle, BorderLayout.SOUTH);
+        JPanel rightPanel = new JPanel();
+        rightPanel.setBackground(Color.WHITE);
+        rightPanel.setLayout(new FlowLayout(FlowLayout.RIGHT, 10, 15));
         
-        header.add(titlePanel, BorderLayout.WEST);
+        JButton refreshBtn = new JButton("Refresh");
+        refreshBtn.setBackground(new Color(52, 152, 219));
+        refreshBtn.setForeground(Color.WHITE);
+        refreshBtn.setFont(new Font("Arial", Font.PLAIN, 12));
+        refreshBtn.setBorder(new EmptyBorder(8, 15, 8, 15));
+        refreshBtn.setFocusPainted(false);
+        refreshBtn.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        refreshBtn.addActionListener(e -> refreshData());
+        rightPanel.add(refreshBtn);
+        
+        header.add(rightPanel, BorderLayout.EAST);
+        
         return header;
     }
     
     public void refreshData() {
         transactions = dataManager.loadTransactions();
-        goals = dataManager.loadGoals();
-        
-        // Refresh all tabs
         for (int i = 0; i < tabbedPane.getTabCount(); i++) {
             Component comp = tabbedPane.getComponentAt(i);
             if (comp instanceof Refreshable) {
@@ -80,10 +87,6 @@ public class DashboardPanel extends JPanel {
     
     public List<Transaction> getTransactions() {
         return transactions;
-    }
-    
-    public List<Goal> getGoals() {
-        return goals;
     }
 }
 

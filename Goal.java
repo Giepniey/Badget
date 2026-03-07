@@ -9,7 +9,7 @@ public class Goal implements Serializable {
     private double targetAmount;
     private double currentAmount;
     private LocalDate targetDate;
-    private String imageBase64; // Store image as base64
+    private String imageBase64;
     private LocalDate createdDate;
     private LocalDate lastModifiedDate;
     
@@ -40,7 +40,6 @@ public class Goal implements Serializable {
         return "GOAL-" + System.currentTimeMillis();
     }
     
-    // Getters
     public String getId() { return id; }
     public String getName() { return name; }
     public double getTargetAmount() { return targetAmount; }
@@ -52,7 +51,6 @@ public class Goal implements Serializable {
     public double getProgress() { return (currentAmount / targetAmount) * 100; }
     public boolean isCompleted() { return currentAmount >= targetAmount; }
     
-    // Setters
     public void setName(String name) { 
         this.name = name;
         this.lastModifiedDate = LocalDate.now();
@@ -80,7 +78,6 @@ public class Goal implements Serializable {
     }
     
     public String toCsv() {
-        // Escape image data for CSV
         String escapedImage = imageBase64 != null ? imageBase64.replace("\n", "\\n") : "";
         return String.format("%s|%s|%.2f|%.2f|%s|%s|%s|%s",
                 id, name, targetAmount, currentAmount, targetDate, 
@@ -104,7 +101,7 @@ public class Goal implements Serializable {
     
     @Override
     public String toString() {
-        return String.format("%s - $%.2f / $%.2f (%.1f%%)", 
+        return String.format("%s - ₱%.2f / ₱%.2f (%.1f%%)", 
                 name, currentAmount, targetAmount, getProgress());
     }
 }

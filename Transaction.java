@@ -9,7 +9,7 @@ public class Transaction implements Serializable {
     private String category;
     private double amount;
     private String description;
-    private String type; // "Income" or "Expense"
+    private String type;
     
     public Transaction(String id, LocalDate date, String category, double amount, 
                        String description, String type) {
@@ -23,7 +23,7 @@ public class Transaction implements Serializable {
     
     public Transaction(LocalDate date, String category, double amount, 
                        String description, String type) {
-        this.id = generateId();
+        this.id = "TXN-" + System.currentTimeMillis();
         this.date = date;
         this.category = category;
         this.amount = amount;
@@ -31,11 +31,6 @@ public class Transaction implements Serializable {
         this.type = type;
     }
     
-    private static String generateId() {
-        return "TXN-" + System.currentTimeMillis();
-    }
-    
-    // Getters and Setters
     public String getId() { return id; }
     public LocalDate getDate() { return date; }
     public String getCategory() { return category; }
@@ -50,47 +45,33 @@ public class Transaction implements Serializable {
     public void setType(String type) { this.type = type; }
     
     public String toCsv() {
-        // Properly escape description field by wrapping in quotes
-        String escapedDescription = "\"" + description.replace("\"", "\"\"") + "\"";
-        return String.format("%s,%s,%s,%.2f,%s,%s",
-                id, date, category, amount, escapedDescription, type);
+        String escaped = "\"" + description.replace("\"", "\"\"") + "\"";
+        return String.format("%s,%s,%s,%.2f,%s,%s", id, date, category, amount, escaped, type);
     }
     
     public static Transaction fromCsv(String line) {
         try {
-            // Simple but effective CSV parsing for this structure
-            // Handles quoted fields with commas
             String[] parts = parseCsvLine(line);
-            
             if (parts.length < 6) return null;
-            
             LocalDate date = LocalDate.parse(parts[1].trim());
-            String description = parts[4].trim();
-            // Remove surrounding quotes if present
-            if (description.startsWith("\"") && description.endsWith("\"")) {
-                description = description.substring(1, description.length() - 1);
-                description = description.replace("\"\"", "\""); // Unescape quotes
+            String desc = parts[4].trim();
+            if (desc.startsWith("\"") && desc.endsWith("\"")) {
+                desc = desc.substring(1, desc.length() - 1);
+                desc = desc.replace("\"\"", "\"");
             }
-            
             return new Transaction(parts[0].trim(), date, parts[2].trim(), 
-                    Double.parseDouble(parts[3].trim()), description, parts[5].trim());
+                    Double.parseDouble(parts[3].trim()), desc, parts[5].trim());
         } catch (Exception e) {
-            System.err.println("Error parsing CSV line: " + line + " - " + e.getMessage());
             return null;
         }
     }
     
-    /**
-     * Simple CSV parser that respects quoted fields
-     */
     private static String[] parseCsvLine(String line) {
         java.util.List<String> result = new java.util.ArrayList<>();
         StringBuilder current = new StringBuilder();
         boolean inQuotes = false;
-        
         for (int i = 0; i < line.length(); i++) {
             char c = line.charAt(i);
-            
             if (c == '"') {
                 inQuotes = !inQuotes;
                 current.append(c);
@@ -102,13 +83,11 @@ public class Transaction implements Serializable {
             }
         }
         result.add(current.toString());
-        
         return result.toArray(new String[0]);
     }
     
     @Override
     public String toString() {
-        return String.format("%s | %s | %s | $%.2f | %s", 
-                date, type, category, amount, description);
+        return String.format("%s | %s | %s | ₱%.2f | %s", date, type, category, amount, description);
     }
 }

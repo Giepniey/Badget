@@ -6,8 +6,8 @@ public class TransactionHistory implements Serializable {
     
     private String id;
     private String transactionId;
-    private String changeType; // "CREATED", "EDITED", "DELETED"
-    private String previousValues; // JSON-like format
+    private String changeType;
+    private String previousValues;
     private String newValues;
     private LocalDateTime timestamp;
     
@@ -31,7 +31,6 @@ public class TransactionHistory implements Serializable {
         this.timestamp = timestamp;
     }
     
-    // Getters
     public String getId() { return id; }
     public String getTransactionId() { return transactionId; }
     public String getChangeType() { return changeType; }

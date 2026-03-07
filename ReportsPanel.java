@@ -14,54 +14,41 @@ public class ReportsPanel extends JPanel implements Refreshable {
     
     public ReportsPanel(List<Transaction> transactions) {
         this.transactions = transactions;
-        setLayout(new BorderLayout(10, 10));
-        setBackground(new Color(15, 15, 25));
-        setBorder(new EmptyBorder(20, 20, 20, 20));
+        setLayout(new BorderLayout());
+        setBackground(new Color(245, 245, 245));
         
-        JPanel controlPanel = createControlPanel();
-        add(controlPanel, BorderLayout.NORTH);
+        add(createControlPanel(), BorderLayout.NORTH);
         
         reportArea = new JTextArea();
-        reportArea.setBackground(new Color(20, 20, 35));
-        reportArea.setForeground(new Color(200, 200, 210));
+        reportArea.setBackground(new Color(250, 250, 250));
+        reportArea.setForeground(new Color(50, 50, 50));
         reportArea.setEditable(false);
-        reportArea.setFont(new Font("Consolas", Font.PLAIN, 11));
+        reportArea.setFont(new Font("Courier New", Font.PLAIN, 11));
         reportArea.setMargin(new Insets(15, 15, 15, 15));
-        reportArea.setLineWrap(false);
         
-        JScrollPane scrollPane = new JScrollPane(reportArea);
-        scrollPane.setBackground(new Color(20, 20, 35));
-        add(scrollPane, BorderLayout.CENTER);
+        JScrollPane scroll = new JScrollPane(reportArea);
+        scroll.setBorder(new EmptyBorder(20, 20, 20, 20));
+        add(scroll, BorderLayout.CENTER);
         
         generateReport();
     }
     
     private JPanel createControlPanel() {
-        JPanel panel = new JPanel(new FlowLayout(FlowLayout.LEFT, 20, 0));
-        panel.setBackground(new Color(20, 20, 35));
-        panel.setBorder(new EmptyBorder(10, 0, 10, 0));
+        JPanel panel = new JPanel();
+        panel.setBackground(Color.WHITE);
+        panel.setLayout(new FlowLayout(FlowLayout.LEFT, 15, 15));
+        panel.setBorder(new MatteBorder(0, 0, 1, 0, new Color(220, 220, 220)));
         
         JLabel label = new JLabel("Select Month:");
-        label.setForeground(new Color(200, 200, 210));
-        label.setFont(new Font("Segoe UI", Font.PLAIN, 12));
+        label.setFont(new Font("Arial", Font.PLAIN, 12));
         
         monthSpinner = new JSpinner(new SpinnerDateModel());
         monthSpinner.setEditor(new JSpinner.DateEditor(monthSpinner, "yyyy-MM"));
         monthSpinner.setValue(new java.util.Date());
-        monthSpinner.setPreferredSize(new Dimension(120, 30));
         monthSpinner.addChangeListener(e -> generateReport());
-        
-        JButton exportButton = new JButton("Export Report");
-        exportButton.setBackground(new Color(100, 150, 200));
-        exportButton.setForeground(Color.WHITE);
-        exportButton.setFont(new Font("Segoe UI", Font.BOLD, 11));
-        exportButton.setBorder(BorderFactory.createEmptyBorder());
-        exportButton.setCursor(new Cursor(Cursor.HAND_CURSOR));
-        exportButton.addActionListener(e -> exportReport());
         
         panel.add(label);
         panel.add(monthSpinner);
-        panel.add(exportButton);
         
         return panel;
     }
@@ -72,12 +59,10 @@ public class ReportsPanel extends JPanel implements Refreshable {
         YearMonth selectedMonth = YearMonth.from(date);
         
         StringBuilder report = new StringBuilder();
-        report.append("═══════════════════════════════════════════════════════\n");
-        report.append(String.format("MONTHLY REPORT - %s\n", selectedMonth));
-        report.append("═══════════════════════════════════════════════════════\n\n");
+        report.append("MONTHLY REPORT - ").append(selectedMonth).append("\n");
+        report.append("=".repeat(50)).append("\n\n");
         
-        double totalIncome = 0;
-        double totalExpense = 0;
+        double totalIncome = 0, totalExpense = 0;
         Map<String, Double> incomeByCategory = new HashMap<>();
         Map<String, Double> expenseByCategory = new HashMap<>();
         
@@ -95,74 +80,34 @@ public class ReportsPanel extends JPanel implements Refreshable {
             }
         }
         
-        final double finalTotalExpense = totalExpense;
-        
-        // Summary
         report.append("SUMMARY\n");
-        report.append("───────────────────────────────────────────────────────\n");
-        report.append(String.format("Total Income:          $%10.2f\n", totalIncome));
-        report.append(String.format("Total Expenses:        $%10.2f\n", totalExpense));
-        report.append(String.format("Net Balance:           $%10.2f\n\n", totalIncome - totalExpense));
+        report.append("-".repeat(50)).append("\n");
+        report.append(String.format("Total Income:     ₱%10.2f\n", totalIncome));
+        report.append(String.format("Total Expenses:   ₱%10.2f\n", totalExpense));
+        report.append(String.format("Balance:          ₱%10.2f\n\n", totalIncome - totalExpense));
         
-        // Income breakdown
         report.append("INCOME BREAKDOWN\n");
-        report.append("───────────────────────────────────────────────────────\n");
+        report.append("-".repeat(50)).append("\n");
         if (incomeByCategory.isEmpty()) {
-            report.append("No income transactions this month.\n\n");
+            report.append("No income transactions\n\n");
         } else {
-            incomeByCategory.forEach((category, amount) ->
-                    report.append(String.format("%-30s $%10.2f\n", category, amount))
-            );
+            incomeByCategory.forEach((cat, amt) -> 
+                report.append(String.format("%-30s ₱%10.2f\n", cat, amt)));
             report.append("\n");
         }
         
-        // Expense breakdown
         report.append("EXPENSE BREAKDOWN\n");
-        report.append("───────────────────────────────────────────────────────\n");
+        report.append("-".repeat(50)).append("\n");
         if (expenseByCategory.isEmpty()) {
-            report.append("No expense transactions this month.\n\n");
+            report.append("No expense transactions\n");
         } else {
-            expenseByCategory.forEach((category, amount) ->
-                    report.append(String.format("%-30s $%10.2f\n", category, amount))
-            );
-            report.append("\n");
-        }
-        
-        // Expense percentage
-        if (totalExpense > 0) {
-            report.append("EXPENSE PERCENTAGE BY CATEGORY\n");
-            report.append("───────────────────────────────────────────────────────\n");
-            expenseByCategory.forEach((category, amount) -> {
-                double percentage = (amount / finalTotalExpense) * 100;
-                report.append(String.format("%-30s %5.1f%%\n", category, percentage));
-            });
+            expenseByCategory.forEach((cat, amt) -> 
+                report.append(String.format("%-30s ₱%10.2f\n", cat, amt)));
         }
         
         reportArea.setText(report.toString());
     }
     
-    private void exportReport() {
-        JFileChooser chooser = new JFileChooser();
-        chooser.setDialogTitle("Save Report As");
-        chooser.setFileFilter(new javax.swing.filechooser.FileNameExtensionFilter("Text Files", "txt"));
-        
-        if (chooser.showSaveDialog(this) == JFileChooser.APPROVE_OPTION) {
-            try {
-                String filePath = chooser.getSelectedFile().getAbsolutePath();
-                if (!filePath.endsWith(".txt")) {
-                    filePath += ".txt";
-                }
-                java.nio.file.Files.write(java.nio.file.Paths.get(filePath), 
-                        reportArea.getText().getBytes());
-                JOptionPane.showMessageDialog(this, "Report exported successfully!", 
-                        "Success", JOptionPane.INFORMATION_MESSAGE);
-            } catch (Exception e) {
-                JOptionPane.showMessageDialog(this, "Error exporting report: " + e.getMessage(), 
-                        "Error", JOptionPane.ERROR_MESSAGE);
-            }
-        }
-    }
-
     @Override
     public void refresh(List<Transaction> transactions) {
         this.transactions = transactions;
