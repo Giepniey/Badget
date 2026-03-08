@@ -6,13 +6,11 @@ import java.util.List;
 public class DashboardPanel extends JPanel {
     private JTabbedPane tabbedPane;
     private List<Transaction> transactions;
-    private List<Goal> goals;
     private DataManager dataManager;
     
     public DashboardPanel() {
         this.dataManager = new DataManager();
         this.transactions = dataManager.loadTransactions();
-        this.goals = dataManager.loadGoals();
         
         setLayout(new BorderLayout());
         setBackground(new Color(245, 245, 245));
